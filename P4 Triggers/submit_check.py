@@ -9,6 +9,8 @@ import sys
 VERSION_PATTERN   = re.compile(r'_v\d{2}$')
 VERSION_PATTERN_1 = re.compile(r'_v\d{1}$')
 
+
+
 class FileNameChecker:
     def __init__(self, prefix_rules_path):
         """Init checker, read JSON config"""
@@ -22,17 +24,24 @@ class FileNameChecker:
     @staticmethod
     def get_files_in_changelist(cl):
         """get all file paths in the changelist"""
-        cmd = ["p4", "opened", "-c", cl]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        cmd = ['p4', '-ztag', 'describe', '-s', str(cl)]
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
+        
         if result.returncode != 0:
             print("Error getting file list from changelist:", result.stderr)
             sys.exit(1)
 
+        lines = result.stdout.splitlines()
         files = []
-        for line in result.stdout.splitlines():
-            if line.startswith("//"):
-                path = line.split("#")[0].strip()
-                files.append(path)
+        current_file = None
+        current_action = None
+
+        for line in lines:
+            if line.startswith('... depotFile'):
+                current_file = line.split(' ', 2)[2]
+            elif line.startswith('... action'):
+                current_action = line.split(' ', 2)[2]
+                files.append({'path': current_file, 'action': current_action})
         return files
 
     def check_files(self, files):
@@ -40,6 +49,9 @@ class FileNameChecker:
         bad_files = []
 
         for f in files:
+            if f['action'] == "delete" or f['action'] == "move/delete" or f['action'] == "purge":
+                continue
+
             filename = os.path.basename(f)
 
             # Check for matched rule

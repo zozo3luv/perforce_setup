@@ -4,10 +4,11 @@ import sys
 from submit_check import FileNameChecker
 
 # ========================
-# 仓库特定配置
+# FILE Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PREFIX_RULES_FILE = os.path.join(SCRIPT_DIR, "prefix_rules.json")
-# 可扩展：P4USER, P4PORT 等
+
+# environment configs
 os.environ["P4PORT"] = "ssl:localhost:1666"
 os.environ["P4USER"] = "username"
 os.environ["P4PASSWD"] = "passwd"
