@@ -1,0 +1,38 @@
+{
+	".mat"        		: "Mat_",
+	".shader"    		: "Sh_",
+	".shadergraph"		: "Sh_",
+	".mesh"      		: "Msh_",
+	".prefab"    		: "Pf_",
+	".anim"      		: "Clip_",
+	".controller"		: "Anim_",
+	".unity"     		: "Scn_",
+	".unitypackage"	    : "Pkg_",
+
+	".cs"        		: "Cs_",
+	".asm"       		: "Asm_",
+	".json"      		: "Conf_",
+
+	".fbx"       		: "Mdl_",
+	".obj"       		: "Mdl_",
+	".blend"     		: "Mdl_",
+
+	".mp4"       		: "Vid_",
+	".mov"       		: "Vid_",
+	".avi"       		: "Vid_",
+	".mkv"       		: "Vid_",
+	".webm"      		: "Vid_",
+
+	".tga"       		: "Tex_",
+	".png"       		: "Tex_",
+	".jpg"       		: "Tex_",
+	".psd"       		: "Tex_",
+	".hdr"       		: "Tex_",
+	".exr"       		: "Tex_",
+	".bmp"       		: "Tex_",
+	".gif"       		: "Tex_",
+	".tif"       		: "Tex_",
+
+	".wav"       		: "Aud_",
+	".mp3"       		: "Aud_"
+}

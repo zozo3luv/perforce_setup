@@ -9,7 +9,9 @@ import sys
 VERSION_PATTERN   = re.compile(r'_v\d{2}$')
 VERSION_PATTERN_1 = re.compile(r'_v\d{1}$')
 
-
+# Exclude patterns (case-sensitive)
+EXCLUDE_PATTERN    = re.compile(r'EXTN_')
+EXCLUDE_PATTERN_1  = re.compile(r'_EXTN')
 
 class FileNameChecker:
     def __init__(self, prefix_rules_path):
@@ -52,15 +54,21 @@ class FileNameChecker:
             if f['action'] == "delete" or f['action'] == "move/delete" or f['action'] == "purge":
                 continue
 
-            filename = os.path.basename(f)
+            # Skip files that match exclude patterns in the filename
+            if EXCLUDE_PATTERN.search(f['path']) or EXCLUDE_PATTERN_1.search(f['path']):
+                continue
+
+            filename_full = os.path.basename(f['path'])
+            filename = filename_full[:-5] if filename_full.lower().endswith('.meta') else filename_full
 
             # Check for matched rule
             prefix_rule = None
             file_type = None
-            for rule_ext, prefix in self.prefix_rules.items():
-                if filename.lower().endswith(rule_ext):
+
+            for ext, prefix in self.prefix_rules.items():
+                if filename.lower().endswith(ext):
                     prefix_rule = prefix
-                    file_type = rule_ext
+                    file_type = ext
                     break
 
             if not prefix_rule:
@@ -72,16 +80,17 @@ class FileNameChecker:
                 good_prefix = False
 
             # Check suffix: VERSION_PATTERN
+            no_ext_name = filename[:-len(file_type)]
             good_suffix = True
-            if not VERSION_PATTERN.search(filename) and not VERSION_PATTERN_1.search(filename):
+            if not VERSION_PATTERN.search(no_ext_name) and not VERSION_PATTERN_1.search(no_ext_name):
                 good_suffix = False
 
             if not good_prefix and not good_suffix:
-                bad_files.append((filename, file_type, prefix_rule, "presuf"))
+                bad_files.append((filename_full, file_type, prefix_rule, "presuf"))
             elif not good_prefix:
-                bad_files.append((filename, file_type, prefix_rule, "prefix"))
+                bad_files.append((filename_full, file_type, prefix_rule, "prefix"))
             elif not good_suffix:
-                bad_files.append((filename, file_type, prefix_rule, "suffix"))
+                bad_files.append((filename_full, file_type, prefix_rule, "suffix"))
 
         return bad_files
 
@@ -94,7 +103,10 @@ class FileNameChecker:
         print("Please rename the following files：\n")
         
         for f, file_type, prefix_rule, err_type in bad_files:
-            name_only = f[:-len(file_type)] if f.lower().endswith(file_type.lower()) else f
+            if (f.lower().endswith('.meta')):
+                name_only = f[:-5]
+
+            name_only = f[:-len(file_type)]
 
             if err_type == "prefix":
                 suggested = prefix_rule + f
@@ -109,4 +121,7 @@ class FileNameChecker:
                 print(f"  - {f}  → Missing both prefix '{prefix_rule}' and version suffix like '_v01'  |  Suggested: {suggested}")
 
         print("\nPlease rename the files before submitting again.")
+        print("\nIf you have external imported resources, please add the EXTN_ prefix in the root folder of the resources.")
+        print("\n请根据要求重命名文件后再提交")
+        print("\n若有外部导入资源，请在资源的根文件夹中添加 EXTN_ 前缀")
         sys.exit(1)
