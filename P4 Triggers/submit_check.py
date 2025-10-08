@@ -25,25 +25,27 @@ class FileNameChecker:
 
     @staticmethod
     def get_files_in_changelist(cl):
-        """get all file paths in the changelist"""
+        """Get all file paths and actions in the changelist (robust & fast)."""
         cmd = ['p4', '-ztag', 'describe', '-s', str(cl)]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, text=True)
-        
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
         if result.returncode != 0:
             print("Error getting file list from changelist:", result.stderr)
             sys.exit(1)
 
-        lines = result.stdout.splitlines()
-        files = []
-        current_file = None
-        current_action = None
+        out = result.stdout
 
-        for line in lines:
-            if line.startswith('... depotFile'):
-                current_file = line.split(' ', 2)[2]
-            elif line.startswith('... action'):
-                current_action = line.split(' ', 2)[2]
-                files.append({'path': current_file, 'action': current_action})
+        pattern = re.compile(r'^\s*\.{3}\s+(depotFile\d+|action\d+)\s(.+)$', re.MULTILINE)
+        files = []
+        current_depot = None
+        for m in pattern.finditer(out):
+            typ, val = m.group(1), m.group(2).strip()
+            if typ.startswith('depotFile'):
+                current_depot = val.split('#', 1)[0]
+            elif typ.startswith('action'):
+                if current_depot is not None:
+                    files.append({'path': current_depot, 'action': val})
+                    current_depot = None
         return files
 
     def check_files(self, files):
@@ -51,6 +53,7 @@ class FileNameChecker:
         bad_files = []
 
         for f in files:
+
             if f['action'] == "delete" or f['action'] == "move/delete" or f['action'] == "purge":
                 continue
 
@@ -111,17 +114,20 @@ class FileNameChecker:
             if err_type == "prefix":
                 suggested = prefix_rule + f
                 print(f"  - {f}  → Missing prefix: '{prefix_rule}'  |  Suggested: {suggested}")
+                print(f"  - {f}  → 缺少前缀: '{prefix_rule}'  |  请改为: {suggested}")
 
             elif err_type == "suffix":
                 suggested = f"{name_only}_v01{file_type}"
                 print(f"  - {f}  → Missing version suffix like '_v01'  |  Suggested: {suggested}")
+                print(f"  - {f}  → 缺少版本后缀，如 '_v01'  |  推荐改为: {suggested}")
 
             elif err_type == "presuf":
                 suggested = f"{prefix_rule}{name_only}_v01{file_type}"
                 print(f"  - {f}  → Missing both prefix '{prefix_rule}' and version suffix like '_v01'  |  Suggested: {suggested}")
+                print(f"  - {f}  → 同时缺少前缀： '{prefix_rule}'，以及版本后缀，如 '_v01'  |  推荐改为: {suggested}")
 
         print("\nPlease rename the files before submitting again.")
         print("\nIf you have external imported resources, please add the EXTN_ prefix in the root folder of the resources.")
-        print("\n请根据要求重命名文件后再提交")
+        print("\n请务必在 P4V软件内 重命名文件后再提交")
         print("\n若有外部导入资源，请在资源的根文件夹中添加 EXTN_ 前缀")
         sys.exit(1)
