@@ -126,8 +126,9 @@ class FileNameChecker:
                 print(f"  - {f}  → Missing both prefix '{prefix_rule}' and version suffix like '_v01'  |  Suggested: {suggested}")
                 print(f"  - {f}  → 同时缺少前缀： '{prefix_rule}'，以及版本后缀，如 '_v01'  |  推荐改为: {suggested}")
 
-        print("\nPlease rename the files before submitting again.")
+        print("\n==================== WARNING ====================")
+        print("\nPlease rename the files before submitting again. And remember to Reconcile after renaming.")
         print("\nIf you have external imported resources, please add the EXTN_ prefix in the root folder of the resources.")
-        print("\n请务必在 P4V软件内 重命名文件后再提交")
+        print("\n请重命名文件后再提交，重命名后记得 Reconcile")
         print("\n若有外部导入资源，请在资源的根文件夹中添加 EXTN_ 前缀")
         sys.exit(1)
