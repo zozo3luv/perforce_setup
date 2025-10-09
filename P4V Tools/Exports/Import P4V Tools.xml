@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<CustomToolDefList varName="customtooldeflist">
+  <CustomToolDef>
+    <Definition>
+      <Name>CHECKOUT Folders</Name>
+      <Command>{TRIGGER CHECKOUT}</Command>
+      <Arguments>%D</Arguments>
+      <Shortcut></Shortcut>
+      <InitDir>%f</InitDir>
+    </Definition>
+    <Refresh>true</Refresh>
+  </CustomToolDef>
+  <CustomToolDef>
+    <Definition>
+      <Name>CHECKOUT Files</Name>
+      <Command>{TRIGGER CHECKOUT}</Command>
+      <Arguments>%F</Arguments>
+      <Shortcut></Shortcut>
+      <InitDir>%f</InitDir>
+    </Definition>
+    <Refresh>true</Refresh>
+  </CustomToolDef>
+  <CustomToolDef>
+    <Definition>
+      <Name>Validate and Submit</Name>
+      <Command>{TRIGGER VALIDATE}</Command>
+      <Arguments>%C</Arguments>
+      <Shortcut></Shortcut>
+      <InitDir>%f</InitDir>
+    </Definition>
+    <Console>
+      <CloseOnExit>false</CloseOnExit>
+    </Console>
+    <AddToContext>true</AddToContext>
+    <Refresh>true</Refresh>
+  </CustomToolDef>
+</CustomToolDefList>
